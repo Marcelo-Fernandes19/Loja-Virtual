@@ -1,0 +1,2 @@
+# Projeto-Extensionista
+ Este é um projeto de aplicativo móvel para uma loja de roupas, permitindo aos usuários explorar o catálogo de produtos, verificar tamanhos, cores e preços, e finalizar compras via WhatsApp. Além disso, inclui uma tela de login com autenticação segura usando Firebase, permitindo o cadastro de novos usuários e a redefinição de senha. Este projeto visa oferecer uma experiência de compra intuitiva e segura aos clientes, utilizando tecnologias modernas para garantir funcionalidades eficientes.
