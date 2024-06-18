@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, Image, ScrollView, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, Text, Image, ScrollView, StyleSheet, TouchableOpacity, Modal, Alert } from 'react-native';
 import Dot from '../../component/Clothes/Dot';
 import SizeButton from '../../component/Clothes/SizeButton';
 import Button from '../../component/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { ZoomIn, ZoomOut } from 'react-native-reanimated';
+import { FavoriteContext } from '../Favorite/favoritecontext';
 
 export default function Detail(props) {
   let products = props.route.params;
@@ -15,6 +17,7 @@ export default function Detail(props) {
   const [corSelecionada, setCorSelecionada] = useState('');
   const [tamanhoSelecionado, setTamanhoSelecionado] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const { addToFavorites } = useContext(FavoriteContext);
 
   const colorNames = {
     '#6C0345': 'Vinho',
@@ -25,7 +28,7 @@ export default function Detail(props) {
     '#A9B388': 'Verde Claro',
     '#9BCF53': 'Verde Limão',
     '#074173': 'Azul Escuro',
-    '#7AA2E3': 'Azul ',
+    '#7AA2E3': 'Azul',
     '#D20062': 'Rosa',
     '#000000': 'Preto',
     '#D04848': 'Vermelho',
@@ -34,6 +37,11 @@ export default function Detail(props) {
 
   const handleSizePress = (size) => {
     setSelectedSize(size);
+  };
+
+  const adicionarAosFavoritos = () => {
+    addToFavorites(products, corSelecionada, tamanhoSelecionado);
+    Alert.alert('Carrinho', 'Produto adicionado ao carrinho com sucesso!');
   };
 
   return (
@@ -56,8 +64,11 @@ export default function Detail(props) {
         />
       </View>
       <View>
-        <View>
+        <View style={{alignItems:'flex-start'}}>
           <Text style={[styles.title, { fontSize: 20 }, { marginTop: 15 }, { color: '#eb248b' }]}>R${products.productPrice}</Text>
+          <TouchableOpacity style={styles.cartButton} onPress={adicionarAosFavoritos}>
+          <FontAwesome name="shopping-cart" size={30} color="#eb248b" />
+          </TouchableOpacity>
         </View>
         <View opacity={0.4}>
           <Text style={[styles.title, { fontSize: 17 }]}>{products.productName}</Text>
@@ -68,6 +79,7 @@ export default function Detail(props) {
             <Dot key={index} color={color} onPress={() => setCorSelecionada(colorNames[color])} />
           ))}
         </View>
+          
         <Text style={{ fontSize: 17, paddingHorizontal: '2%' }}>Tamanhos:</Text>
         <View style={{ flexDirection: 'row', width: '100%' }}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -120,13 +132,9 @@ export default function Detail(props) {
         <View style={styles.texTitle}>
           <Text style={[styles.textContent, { fontSize: 20 }]}>{products.productName}</Text>
         </View>
-
-        {/* Botão para abrir o modal */}
         <TouchableOpacity onPress={() => setModalVisible(true)}>
           <Text style={{ fontSize: 17, paddingHorizontal: '4%', marginTop: '3%', color: 'gray' }}>Ver Descrição...</Text>
         </TouchableOpacity>
-
-        {/* Modal */}
         <Modal
           animationType="none"
           transparent={true}
@@ -139,8 +147,8 @@ export default function Detail(props) {
               entering={ZoomIn}
               exiting={ZoomOut}
             >
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Text style={{ fontSize: 18, color: '#eb248b', marginTop: 20 }}>Fechar</Text>
+              <TouchableOpacity style={styles.favButton} onPress={() => setModalVisible(false)}>
+                <Text style={{ fontSize: 18, color: '#eb248b', marginTop: 20, marginLeft: 15 }}>Fechar</Text>
               </TouchableOpacity>
               <Text style={styles.modalText}>{products.description}</Text>
               <Text style={styles.modalText}>Categoria: {products.category}</Text>
@@ -148,8 +156,6 @@ export default function Detail(props) {
             </Animated.View>
           </View>
         </Modal>
-
-        {/* Botão para comprar */}
         <Button products={products} tamanhoSelecionado={tamanhoSelecionado} corSelecionada={corSelecionada} />
       </View>
     </ScrollView>
@@ -199,22 +205,27 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'flex-end', // Alinha o conteúdo na parte inferior da tela
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo semi-transparente
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems:'center',
+    justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    minHeight: '50%', // Altura mínima definida como metade da tela
+    backgroundColor: '#FFF',
+    width: '100%',
+    height: '40%',
+    borderRadius: 20,
   },
   modalText: {
-    fontSize: 15,
-    lineHeight: 25,
-    marginVertical: '2%',
-    paddingHorizontal: '2%',
-    fontFamily: 'Poppins_400Regular',
-    marginTop: 20
-  }
+    fontSize: 16,
+    marginVertical: 10,
+    marginHorizontal: 20
+  },
+  cartButton:{
+    
+    backgroundColor: 'rgba(250,200,200,0.2)',
+    padding: '2%',
+   
+    borderRadius: '12%',
+    left: 350
+  },
 });

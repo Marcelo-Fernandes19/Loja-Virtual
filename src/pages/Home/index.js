@@ -6,6 +6,8 @@ import Clothes from '../../component/Clothes';
 import { auth } from '../../firebase.config';
 import { useNavigation } from '@react-navigation/native';
 import { signOut } from 'firebase/auth';
+import { FontAwesome } from '@expo/vector-icons';
+
 
 const windowWidth = Dimensions.get('window').width;
 
@@ -13,52 +15,40 @@ export default function Home() {
     const navigation = useNavigation();
     const currentUser = auth.currentUser;
     const [modalVisible, setModalVisible] = useState(false);
-    const [modalVisible2, setModalVisible2] = useState(false);
     const [filter, setFilter] = useState('all'); // Estado do filtro, inicializado como 'all'
-    const [favorites, setFavorites] = useState([]); // Estado para armazenar as roupas favoritas
 
-    if(currentUser != null){
-       
+    if (currentUser != null) {
+
     } else {
         alert('É necessario estar logado para utilizar este recurso!')
         navigation.goBack()
     }
 
-    function logout(){
+    function logout() {
         signOut(auth)
-        .then(()=>{
-            alert('Você desconectou-se do sistema!');
-            navigation.navigate('Login');
-        })
+            .then(() => {
+                alert('Você desconectou-se do sistema!');
+                navigation.navigate('Login');
+            })
     }
-     // Função para adicionar ou remover uma roupa dos favoritos
-     function toggleFavorite(item) {
-        const isFavorite = favorites.some(fav => fav.id === item.id);
-        if (isFavorite) {
-            const updatedFavorites = favorites.filter(fav => fav.id !== item.id);
-            setFavorites(updatedFavorites);
-        } else {
-            setFavorites([...favorites, item]);
-        }
-    }
-     // Função para filtrar os produtos com base no tipo selecionado
-     function handleFilter(type) {
+
+
+    // Função para filtrar os produtos com base no tipo selecionado
+    function handleFilter(type) {
         setFilter(type);
         setModalVisible(false); // Fechar o modal após selecionar um filtro
-     }
+    }
 
     return (
-        
-        <View style={styles.container}>    
+        <View style={styles.container}>
 
             <View style={styles.header}>
 
                 <View style={styles.button}>
-                <Pressable onPress={logout}>
-                    <Text style={styles.buttonText}>Sair</Text>
-                </Pressable>
+                    <Pressable onPress={logout}>
+                        <Text style={styles.buttonText}>Sair</Text>
+                    </Pressable>
                 </View>
-
 
                 <Text style={styles.logo}>
                     <Image
@@ -68,35 +58,43 @@ export default function Home() {
                     />
                     Espaço Jade
                 </Text>
-                <TouchableOpacity
-                    style={{ position: 'absolute', right: 20, bottom: 30, alignSelf: 'center' }}
-                    onPress={() => setModalVisible2(true)} // Abrir o modal de favoritos
-                >
-                    <AntDesign name="hearto" size={24} color="black" />
-                </TouchableOpacity>
+
             </View>
+
             <View style={styles.textContainer}>
-                <Text style={styles.text}>TODOS</Text>
+                <Text style={[styles.text, filter === 'all']}>{filter === 'all' ? 'TODOS' : filter.toUpperCase()}</Text>
                 <Text style={[styles.text, { color: '#cececf' }]}>-</Text>
-                <Text style={[styles.text, { color: '#cececf' }]}>FEMININO</Text>
-                <TouchableOpacity style={{ position: 'absolute', right: 0, alignSelf: 'center' }}>
+                <Text style={[styles.text, { color: '#cececf' }, filter === 'feminino' && styles.selectedText]}>FEMININO</Text>
+                <TouchableOpacity style={{ position: 'absolute', right: '-2%', 
+                     alignSelf: 'center',backgroundColor: 'rgba(250,200,200,0.2)',
+                    padding: '2%',borderRadius: '12%', }}>
                     <MaterialIcons
                         name='filter-list'
-                        size={24}
-                        color='#eb248b'
+                        size={25}
+                        color= '#eb248b'
                         onPress={() => setModalVisible(true)}
                     />
                 </TouchableOpacity>
+
+                {/* Favoritos */}
+                <TouchableOpacity 
+                    style={{ position: 'absolute', right: '15%', 
+                     alignSelf: 'center',backgroundColor: 'rgba(250,200,200,0.2)',
+                    padding: '2%',borderRadius: '12%', }}
+                    onPress={() => navigation.navigate('Favorite')}
+                >
+                    <FontAwesome name="shopping-cart" size={25} color="#eb248b" />
+                </TouchableOpacity>
             </View>
 
+            {/* Chamando os produtos */}
             <View style={styles.line} />
             <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.productsContainer}>
-            {Items.filter(item => filter === 'all' || item.type === filter).map((products, index) =>
-                <Clothes products={products} key={index} />
-                )}
-            </View>
-
+                <View style={styles.productsContainer}>
+                    {Items.filter(item => filter === 'all' || item.type === filter).map((products, index) =>
+                        <Clothes products={products} key={index} />
+                    )}
+                </View>
             </ScrollView>
             {/* Modal para filtro */}
             <Modal
@@ -117,33 +115,11 @@ export default function Home() {
                         <TouchableOpacity onPress={() => handleFilter('vestido')} style={styles.filterButton}>
                             <Text style={styles.filterButtonText}>Vestido</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleFilter('macacao')} style={styles.filterButton}>
+                        <TouchableOpacity onPress={() => handleFilter('macacão')} style={styles.filterButton}>
                             <Text style={styles.filterButtonText}>Macacão</Text>
                         </TouchableOpacity><TouchableOpacity onPress={() => handleFilter('conjunto')} style={styles.filterButton}>
                             <Text style={styles.filterButtonText}>Conjunto</Text>
                         </TouchableOpacity>
-                       
-                    </View>
-                </View>
-            </Modal>
-            {/* Modal para favoritos */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible2}
-                onRequestClose={() => setModalVisible2(false)}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <TouchableOpacity onPress={() => setModalVisible2(false)} style={styles.closeButton}>
-                            <AntDesign name="close" size={24} color="black" />
-                        </TouchableOpacity>
-                        <Text style={styles.modalText}>Roupas Favoritas</Text>
-                        {favorites.map((fav, index) => (
-                            <View key={index} style={styles.favoriteItem}>
-                                <Text>{fav.productName}</Text>
-                            </View>
-                        ))}
                     </View>
                 </View>
             </Modal>
@@ -164,7 +140,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         paddingBottom: 10,
         paddingTop: 45,
-
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
@@ -180,12 +155,16 @@ const styles = StyleSheet.create({
     textContainer: {
         flexDirection: 'row',
         marginVertical: '5%',
-        marginHorizontal: '5%'
+        marginHorizontal: '5%',
+        alignItems: 'center',
     },
     text: {
         fontFamily: 'Poppins_400Regular',
         fontSize: 18,
-        marginHorizontal: '1%'
+        marginHorizontal: '1%',
+    },
+    selectedText: {
+        color: '#eb248b', 
     },
     line: {
         borderBottomColor: '#d8d8d8',
@@ -200,30 +179,28 @@ const styles = StyleSheet.create({
     },
     button: {
         width: 50,
-        top:-25,
-        paddingVertical: 10,
-        borderRadius: 100,
-        backgroundColor: '#eb248b',
+        top: '-3%',
+        paddingVertical: '2%',
+        borderRadius: '10%',
+        backgroundColor: 'rgba(250,200,200,0.2)',
         marginVertical: 10,
-        marginLeft:-70
-        
-      },
-      buttonText: {
-        color: '#fff',
+        marginLeft: -70
+    },
+    buttonText: {
+        color: '#eb248b',
         fontFamily: 'Poppins_400Regular',
-        fontSize: 10,
+        fontSize: 15,
         textAlign: 'center',
-
-      },
-      logo:{
+    },
+    logo: {
         fontFamily: 'Parisienne_400Regular',
-         color: '#eb248b',
-         fontSize: 40,
-         paddingLeft: 5,
-         textAlign:'center',
-         marginLeft:-150
-
-      },modalContainer: {
+        color: '#eb248b',
+        fontSize: 40,
+        paddingLeft: 5,
+        textAlign: 'center',
+        marginLeft: -150
+    },
+    modalContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
@@ -270,4 +247,3 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 });
-
