@@ -1,6 +1,6 @@
 ﻿# Espaço Jade 👗
 
--Projeto extensionista 
+-Projeto para uma loja de roupas
 
 ## Sobre
 
